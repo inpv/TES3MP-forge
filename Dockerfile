@@ -1,23 +1,40 @@
-FROM debian:buster as builder
+FROM debian:buster AS builder
 
-ENV FORGE_VERSION 2.4.0
+ENV FORGE_VERSION=2.4.0
 
 ARG BUILD_THREADS=4
 
 ENV PATH=/usr/local/bin:$PATH
 ENV LD_LIBRARY_PATH=/usr/local/lib64:/usr/local/lib
 
-RUN echo deb http://deb.debian.org/debian buster-backports main >> /etc/apt/sources.list \
-    && cat /etc/apt/sources.list | sed "s/deb /deb-src /g" >> /etc/apt/sources.list \
-    && sed -i "s/ main/ main contrib/g" /etc/apt/sources.list \
-    && apt-get update \
-    && apt-get -y install \
+# Use the Debian archive (buster) and disable Valid-Until checks
+RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99no-check-valid-until \
+ && cat > /etc/apt/sources.list <<'EOF'
+
+deb http://archive.debian.org/debian buster main contrib non-free
+deb-src http://archive.debian.org/debian buster main contrib non-free
+
+deb http://archive.debian.org/debian-security buster/updates main contrib non-free
+deb-src http://archive.debian.org/debian-security buster/updates main contrib non-free
+
+deb http://archive.debian.org/debian buster-updates main contrib non-free
+deb-src http://archive.debian.org/debian buster-updates main contrib non-free
+
+deb http://archive.debian.org/debian buster-backports main contrib non-free
+deb-src http://archive.debian.org/debian buster-backports main contrib non-free
+EOF
+
+RUN apt-get update -o Acquire::Check-Valid-Until=false \
+ && apt-get -y --no-install-recommends install \
         build-essential \
+        ca-certificates \
         cmake/buster-backports \
         git \
-        wget
+        wget \
+ && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get -y build-dep \
+RUN apt-get update -o Acquire::Check-Valid-Until=false \
+    && apt-get -y build-dep \
         libmygui-dev \
     && apt-get -y install \
         libfreetype6-dev \
@@ -37,8 +54,8 @@ RUN apt-get -y build-dep \
     && make install \
     && rm -rf /tmp/mygui
 
-RUN cd /tmp \
-    && git clone https://github.com/bulletphysics/bullet3.git bullet \
+WORKDIR /tmp
+RUN git clone https://github.com/bulletphysics/bullet3.git bullet \
     && cd bullet \
     && mkdir build \
     && cd build \
@@ -59,7 +76,8 @@ RUN cd /tmp \
     && make install \
     && rm -rf /tmp/bullet
 
-RUN apt-get -y build-dep \
+RUN apt-get update -o Acquire::Check-Valid-Until=false \
+    && apt-get -y build-dep \
         libopenscenegraph-3.4-dev \
     && cd /tmp \
     && git clone -b 3.6 https://github.com/OpenMW/osg.git \
@@ -94,35 +112,31 @@ ENV LD_LIBRARY_PATH=/usr/local/lib64:/usr/local/lib
 
 COPY --from=builder /usr/local /usr/local
 
-RUN echo deb http://deb.debian.org/debian buster-backports main >> /etc/apt/sources.list \
-    && apt-get update \
-    && apt-get -y install \
+# Use the Debian archive (buster) and disable Valid-Until checks
+RUN printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99no-check-valid-until \
+ && cat > /etc/apt/sources.list <<'EOF'
+
+deb http://archive.debian.org/debian buster main contrib non-free
+deb-src http://archive.debian.org/debian buster main contrib non-free
+
+deb http://archive.debian.org/debian-security buster/updates main contrib non-free
+deb-src http://archive.debian.org/debian-security buster/updates main contrib non-free
+
+deb http://archive.debian.org/debian buster-updates main contrib non-free
+deb-src http://archive.debian.org/debian buster-updates main contrib non-free
+
+deb http://archive.debian.org/debian buster-backports main contrib non-free
+deb-src http://archive.debian.org/debian buster-backports main contrib non-free
+EOF
+
+RUN apt-get update -o Acquire::Check-Valid-Until=false \
+ && apt-get -y --no-install-recommends install \
         build-essential \
+        ca-certificates \
         cmake/buster-backports \
         git \
-        libavcodec-dev \
-        libavformat-dev \
-        libavutil-dev \
-        libboost-all-dev \
-        libfreetype6 \
-        libluajit-5.1-dev \
-        liblz4-dev \
-        libmp3lame0 \
-        libncurses5-dev \
-        libopenal-dev \
-        libopus0 \
-        libpng16-16 \
-        libqt5opengl5-dev \
-        libsdl2-dev \
-        libswscale-dev \
-        libtheora0 \
-        libunshield-dev \
-        lsb-release \
-        qt5-default \
-        qtbase5-dev \
-        qtbase5-dev-tools \
-        unzip \
-        wget
+        wget \
+ && rm -rf /var/lib/apt/lists/*
 
 RUN git config --global user.email "nwah@mail.com" \
     && git config --global user.name "N'Wah" \
