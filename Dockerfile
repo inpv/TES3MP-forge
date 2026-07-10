@@ -135,6 +135,28 @@ RUN apt-get update -o Acquire::Check-Valid-Until=false \
         ca-certificates \
         cmake/buster-backports \
         git \
+        libavcodec-dev \
+        libavformat-dev \
+        libavutil-dev \
+        libboost-all-dev \
+        libfreetype6 \
+        libluajit-5.1-dev \
+        liblz4-dev \
+        libmp3lame0 \
+        libncurses5-dev \
+        libopenal-dev \
+        libopus0 \
+        libpng16-16 \
+        libqt5opengl5-dev \
+        libsdl2-dev \
+        libswscale-dev \
+        libtheora0 \
+        libunshield-dev \
+        lsb-release \
+        qt5-default \
+        qtbase5-dev \
+        qtbase5-dev-tools \
+        unzip \
         wget \
  && rm -rf /var/lib/apt/lists/*
 
