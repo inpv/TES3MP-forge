@@ -1,6 +1,6 @@
 # TES3MP-forge
 
-A container to simplify the packaging of TES3MP for GNU/Linux with fixes for newer Linux systems
+A container to simplify the packaging of TES3MP for GNU/Linux with fixes for newer Linux systems.
 
 This Docker image creates a Debian Buster build environment, compiles a bunch of dependencies with parameters to make the resulting TES3MP GNU/Linux package work on most distros, and finally summons [TES3MP-deploy](https://github.com/GrimKriegor/TES3MP-deploy) to build and package TES3MP automatically.
 
